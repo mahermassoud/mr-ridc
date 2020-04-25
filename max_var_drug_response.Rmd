@@ -1,0 +1,51 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+Drug response has multiple doses for each drug. To simplify the problem,
+for each drug I am going to get the dosage that maximized the variance
+accross cell lines
+```{r}
+library(tidyverse)
+
+data.fp <- "/Users/massoudmaher/Documents/Code/mr-ridc/data"
+drug.rep.fp <- file.path(data.fp, "secondary-screen-replicate-collapsed-logfold-change.csv")
+```
+
+```{r}
+drug <- read_csv(drug.rep.fp)
+colnames(drug)[1] <- "cell_line"
+head(drug)
+```
+
+```{r}
+m.drug <- drug %>% 
+  gather(key="broad_id.dose.other_id", value="lfc", names(drug)[2:ncol(drug)])
+head(m.drug)
+```
+
+```{r}
+nm.drug <- m.drug %>% 
+  separate(broad_id.dose.other_id, sep="::", 
+           into=c("broad_id", "dosage", "junk")) %>%
+  mutate(dosage=as.numeric(dosage)) %>%
+  select(-junk)
+head(nm.drug)
+```
+
+```{r}
+variances <- nm.drug %>% 
+  #group_by(broad_id, as.character(dosage)) %>%
+  group_by(broad_id, dosage) %>%
+  summarise(variance=var(lfc, na.rm=TRUE))
+head(variances)
+```
+
+# Plot variances for a few broad ids to see if they actually tell us anything
+```{r}
+ggplot(variances) +
+  geom_point(aes(x=dosage,y=variance), alpha=0.3)
+```
+
+
+
