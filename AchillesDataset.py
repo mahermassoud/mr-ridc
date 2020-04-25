@@ -59,8 +59,13 @@ class AchillesDataset(Dataset):
     for ds in datasets:
       numpy_fp = path.join(data_fp, DATASETS[axis][ds])
       self.ds2table[ds] = torch.squeeze(to_tensor(np.load(numpy_fp)))
-      print(ds)
-      print(self.ds2table[ds].shape)
+    
+    if axis == "cell_line" and "crispr" in datasets and "gene_expr" in datasets:
+      crispr = self.ds2table["crispr"]
+      expr = self.ds2table["gene_expr"]
+      combined = np.stack([crispr, expr]).transpose((1,0,2))
+      self.datasets.append("crispr_gene_expr")
+      self.ds2table["crispr_gene_expr"] = combined
     
     # Read in metadata
     self.genes = np.load(path.join(data_fp, GENE_LIST_FN), allow_pickle=True)
@@ -75,7 +80,11 @@ class AchillesDataset(Dataset):
 
     out_dict = {}
     for ds in self.datasets:
-      out_dict[ds] = self.ds2table[ds][idx, :]
+      tbl = self.ds2table[ds]
+      if len(tbl.shape) == 2:
+        out_dict[ds] = tbl[idx, :]
+      elif len(tbl.shape) == 3:
+        out_dict[ds] = tbl[idx, :, :]
 
     return out_dict
       
@@ -95,6 +104,8 @@ if __name__ == "__main__":
     print(batch["crispr"].shape)
     print("batch[\"gene_expr\"].shape")
     print(batch["gene_expr"].shape)
+    print("batch[\"crispr_gene_expr\"].shape")
+    print(batch["crispr_gene_expr"].shape)
 
     if i == 2:
       break

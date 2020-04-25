@@ -80,8 +80,8 @@ stack_expression = np.expand_dims(z_imp_expression_mp, axis=2).astype(float)
 stack_crispr = np.expand_dims(imp_crispr_np, axis=2).astype(float)
 
 #%% Save files for later
-np.save(path.join(data_fp, "norm_imputed_expression.npy"), z_imp_expression_mp)
-np.save(path.join(data_fp, "imputed_crispr.npy"), crispr_np)
+#np.save(path.join(data_fp, "norm_imputed_expression.npy"), z_imp_expression_mp)
+#np.save(path.join(data_fp, "imputed_crispr.npy"), crispr_np)
 
 #%% Prepare metadata
 cell_lines_np = cell_lines.to_numpy()
