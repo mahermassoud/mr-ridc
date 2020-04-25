@@ -100,7 +100,7 @@ if __name__ == "__main__":
       break
     i += 1
 
-  print("achilles.genes holds gene names in correct order")
-  print(achilles.genes[:5])
-  print("achilles.cells holds cell line names in correct order")
-  print(achilles.cells[:5])
+  print("cell_achilles.genes holds gene names in correct order")
+  print(cell_achilles.genes[:5])
+  print("cell_achilles.cells holds cell line names in correct order")
+  print(cell_achilles.cells[:5])

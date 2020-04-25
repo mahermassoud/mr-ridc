@@ -50,7 +50,7 @@ expression_final = expression_final.sort_values(by=['broad_id'])
 crispr_final = crispr_final_g.loc[crispr_final_g['broad_id'].isin(shared_cl)]
 crispr_final = crispr_final.sort_values(by=['broad_id'])
 
-gene_list = crispr_final["broad_id"]
+cell_lines = crispr_final["broad_id"]
 
 expression_final = expression_final.drop('broad_id', 1)
 crispr_final = crispr_final.drop('broad_id', 1)
@@ -84,8 +84,8 @@ np.save(path.join(data_fp, "norm_imputed_expression.npy"), z_imp_expression_mp)
 np.save(path.join(data_fp, "imputed_crispr.npy"), crispr_np)
 
 #%% Prepare metadata
-gene_list_np = gene_list.to_numpy()
-cell_lines_np = expression_final.columns.to_numpy()
+cell_lines_np = cell_lines.to_numpy()
+gene_list_np = expression_final.columns.to_numpy()
 
 #%% Save metadata
 np.save(path.join(data_fp, "clean_gene_list.npy"), gene_list_np)
