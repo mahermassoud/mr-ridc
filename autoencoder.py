@@ -8,7 +8,7 @@ class Encoder(nn.Module):
     # Kernel size is key. We want to take crispr/expression pairs
     # We do NOT want to assume dependency between different genes
     self.conv1 = nn.Conv1d(2, 10, 1)
-    self.conv2 = nn.Conv1d(10,1,1)
+    self.conv2 = nn.Conv1d(10, 1, 1)
     self.linear1 = nn.Linear(n_gene, encode_dim)
 
   def forward(self,x):

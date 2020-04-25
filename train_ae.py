@@ -6,6 +6,7 @@ from os import path
 import numpy as np
 from AEDataset import *
 from autoencoder import *
+from time import time
 
 #%% Params -----------------------------------
 # Path to repo directory
@@ -14,7 +15,7 @@ DD = path.join(RD, "data")
 
 # Subsets data so its easier to debug, set to None to use whole dataset
 MAX_ITEM = None
-MAX_EPOCH = 1
+MAX_EPOCH = 10
 LEARN_RATE = 0.0001
 MOMENTUM = 0.3
 BATCH_SZ = 10
@@ -61,6 +62,7 @@ decoder.train()
 #%% Training loop ---------------------------------
 losses = np.zeros(MAX_EPOCH)
 for epoch in range(MAX_EPOCH):
+  start_time = time()
   for batch in train_loader:
     optimizer.zero_grad()
     batch = batch[0].to(device)
@@ -72,4 +74,4 @@ for epoch in range(MAX_EPOCH):
     optimizer.step()
 
   losses[epoch] = loss.item()
-  print(f"epoch {epoch}, loss {loss.item()}")
+  print(f"epoch {epoch}, {time()-start_time}s loss {loss.item()}")

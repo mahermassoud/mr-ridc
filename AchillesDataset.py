@@ -1,3 +1,7 @@
+"""
+Data loader for achilles dataset run this file and look at __main__ for 
+example of how to use
+"""
 import torch
 from os import path
 import pandas as pd
@@ -5,77 +9,98 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
 
-# Change this to path to data directory 
-DD = "/Users/massoudmaher/Documents/Code/mr-ridc/data"
+"""
+Specify files here
+axis_val : dict( include_val:path_in_data_dir )
+"""
+DATASETS = {
+  "cell_line": {
+    "crispr": "imputed_crispr.npy", 
+    "gene_expr": "norm_imputed_expression.npy", 
+    #"pca_crispr": , # TODO
+  },
+  "drug": {
+    "response": "secondary-screen-cell-line-info.csv",
+    "info": "secondary-screen-replicate-treatment-info.csv",
+    #"moa": "" # TODO
+  }
+}
+GENE_LIST_FN = "clean_gene_list.npy"
+CELL_LINES_FN = "clean_cell_lines.npy"
+to_tensor = transforms.ToTensor()
 
 class AchillesDataset(Dataset):
-  
-  def __init__(self):
+
+  def __init__(
+    self, 
+    data_fp="/content/drive/My Drive/Mr RIDC/Data",
+    axis="cell_line",
+    datasets=["crispr"]
+    # TODO train test split?
+  ):
+    """
+    data_fp: path to directory that holds all of the data_files.
+             Default is for collab. If running locally, must change
+    axis: what one item is, must be "cell_line" or "drug"
+          eg. if "cell_line", __getitem__ returns the crispr, rna for 1 cell line
+    datasets: list of data types to include in output, different possible values 
+              for depending on axis. To reduce memory usage, only include the data
+              types you will actually use
+    """
+    self.axis = axis
+    self.datasets = datasets
+    if axis not in DATASETS.keys():
+      raise ValueError(f"axis must be one of {DATASETS.keys()}")
+    if any([ds not in DATASETS[axis].keys() for ds in datasets]):
+      raise ValueError(f"datasets param must be in {DATASETS[axis].keys()}")
+
+    # Maps from dataset to a tensor where each row represents a data point
+    self.ds2table = {}
+    for ds in datasets:
+      numpy_fp = path.join(data_fp, DATASETS[axis][ds])
+      self.ds2table[ds] = torch.squeeze(to_tensor(np.load(numpy_fp)))
+      print(ds)
+      print(self.ds2table[ds].shape)
+    
+    # Read in metadata
+    self.genes = np.load(path.join(data_fp, GENE_LIST_FN), allow_pickle=True)
+    self.cells = np.load(path.join(data_fp, CELL_LINES_FN), allow_pickle=True)
 
   def __len__(self):
-
-    pass
-
+    return self.ds2table[self.datasets[0]].shape[0]
 
   def __getitem__(self, idx):
     if torch.is_tensor(idx):
       idx = idx.tolist()
-    img_name = self.annot.iloc[idx, 0]
 
-    class_id = self.annot.iloc[idx, 1]
-    species = self.annot.iloc[idx, 2]
-    breed_id = self.annot.iloc[idx, 3]
+    out_dict = {}
+    for ds in self.datasets:
+      out_dict[ds] = self.ds2table[ds][idx, :]
 
-    dict_out = {
-      "img_name": img_name,
-      "class_id": class_id,
-      #"class_vec": class_vec,
-      "species": species,
-      "breed_id": breed_id,
-    }
-    if self.load_feature:
-      feat_fp = path.join(FEAT_FP, img_name + ".pt")
-      feat = torch.load(feat_fp)
-      if self.norm_feature:
-        feat = NORM_TRANSFORM(feat)
-      dict_out["feat"] = feat
-    if self.load_image:
-      img_fp = path.join(ALL_IMG_FP, img_name + ".jpg")
-      img = Image.open(img_fp).convert("RGB")
-      if self.transform is not None:
-        img = self.transform(img)
-      dict_out["t_img"] = img
-
-    return dict_out
-
-  def __one_hot_class(self, cid):
-    one_hot = np.zeros(self.n_label)
-    one_hot[cid - 1] = 1
-    return torch.Tensor(one_hot)
+    return out_dict
+      
 
 if __name__ == "__main__":
-  op_train = OxfordPetsDataset()
-  op_test = OxfordPetsDataset(False)
+  print("Iterating over cell lines")
+  cell_achilles = AchillesDataset(
+    data_fp="/Users/massoudmaher/Documents/Code/mr-ridc/data",
+    axis="cell_line",
+    datasets=["crispr","gene_expr"]
+   )
 
-  train_loader = DataLoader(op_train, batch_size=4,
-                            shuffle=False, num_workers=0)
-  test_loader = DataLoader(op_test, batch_size=4,
-                            shuffle=False, num_workers=0)
-
+  cell_achilles_loader = DataLoader(cell_achilles, batch_size=4, shuffle=False)
   i = 0
-  for bi, d in enumerate(train_loader):
-    print(d["img_name"])
-    print(d["t_img"].shape)
+  for batch in cell_achilles_loader:
+    print("batch[\"crispr\"].shape")
+    print(batch["crispr"].shape)
+    print("batch[\"gene_expr\"].shape")
+    print(batch["gene_expr"].shape)
 
-    if i >= 2:
-      break
-    i += 1
- 
-  print("test-------")
-  for bi, d in enumerate(test_loader):
-    print(d["img_name"])
-
-    if i >= 2:
+    if i == 2:
       break
     i += 1
 
+  print("achilles.genes holds gene names in correct order")
+  print(achilles.genes[:5])
+  print("achilles.cells holds cell line names in correct order")
+  print(achilles.cells[:5])
