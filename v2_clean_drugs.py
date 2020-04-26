@@ -24,7 +24,10 @@ info_drugs = info_w_moa["broad_id"].drop_duplicates()
 ov_drugs = np.sort(list(set(response_drugs) & set(info_drugs)))
 
 ov_info = info_w_moa[info_w_moa["broad_id"].isin(ov_drugs)]
-ov_response = drug_response # They actually completely overlap
+resp_cols = [None] + [c.split("::")[0] for c in drug_response.columns[1:]]
+keep_cols = np.where(np.array([rc in ov_drugs for rc in resp_cols]))[0]
+keep_cols = np.concatenate([[0], keep_cols])
+ov_response = drug_response[:,list(keep_cols)]
 #resp_cols = np.where(np.isin(response_drugs, ov_drugs)) + 1
 #ov_response = drug_response[[0]+resp_cols]
 
@@ -83,7 +86,7 @@ ov_resp_cell, ov_resp_drug, ov_dose_resp = stack_response_dosage(ov_response)
 
 # %% Save files
 np.save(path.join(data_fp, "drug/drug_only_overlap/moa_broad_ids.npy"), broad_id_np)
-np.save(path.join(data_fp, "drug/drug_only_overlap/moas.npy"), broad_id_np)
+np.save(path.join(data_fp, "drug/drug_only_overlap/moas.npy"), uniq_moa_np)
 np.save(path.join(data_fp, "drug/drug_only_overlap/n_hot_moa.npy"), broad_id_np)
 pickle.dump(drug2moa_inds, 
             open(path.join(data_fp, "drug/drug_only_overlap/drug2moa_inds.pi"), "wb"))
