@@ -2,6 +2,7 @@
 import pandas as pd
 from os import path
 import numpy as np
+import pickle
 
 #%% Read in data
 data_fp =  "/Users/massoudmaher/Documents/Code/mr-ridc/data"
@@ -79,5 +80,18 @@ def stack_response_dosage(drug_response):
   return drug_response["cell_line"].to_numpy(), drugs, resp_dosage_np
 
 ov_resp_cell, ov_resp_drug, ov_dose_resp = stack_response_dosage(ov_response)
+
+# %% Save files
+np.save(path.join(data_fp, "drug/drug_only_overlap/moa_broad_ids.npy"), broad_id_np)
+np.save(path.join(data_fp, "drug/drug_only_overlap/moas.npy"), broad_id_np)
+np.save(path.join(data_fp, "drug/drug_only_overlap/n_hot_moa.npy"), broad_id_np)
+pickle.dump(drug2moa_inds, 
+            open(path.join(data_fp, "drug/drug_only_overlap/drug2moa_inds.pi"), "wb"))
+pickle.dump(drug2moa_n_hot, 
+            open(path.join(data_fp, "drug/drug_only_overlap/drug2moa_n_hot.pi"), "wb"))
+
+np.save(path.join(data_fp, "drug/drug_only_overlap/ov_resp_cell.npy"), ov_resp_cell)
+np.save(path.join(data_fp, "drug/drug_only_overlap/ov_resp_drug.npy"), ov_resp_drug)
+np.save(path.join(data_fp, "drug/drug_only_overlap/ov_dose_resp.npy"), ov_dose_resp)
 
 # %%
