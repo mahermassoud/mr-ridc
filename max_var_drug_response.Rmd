@@ -12,18 +12,21 @@ data.fp <- "/Users/massoudmaher/Documents/Code/mr-ridc/data"
 drug.rep.fp <- file.path(data.fp, "secondary-screen-replicate-collapsed-logfold-change.csv")
 ```
 
+# Read in drug responses
 ```{r}
 drug <- read_csv(drug.rep.fp)
 colnames(drug)[1] <- "cell_line"
 head(drug)
 ```
 
+# Melt it 
 ```{r}
 m.drug <- drug %>% 
   gather(key="broad_id.dose.other_id", value="lfc", names(drug)[2:ncol(drug)])
 head(m.drug)
 ```
 
+# Extract doses
 ```{r}
 nm.drug <- m.drug %>% 
   separate(broad_id.dose.other_id, sep="::", 
@@ -33,19 +36,35 @@ nm.drug <- m.drug %>%
 head(nm.drug)
 ```
 
+# Drug, dose variances accross all cell lines
 ```{r}
-variances <- nm.drug %>% 
+per.drug.dose <- nm.drug %>% 
   #group_by(broad_id, as.character(dosage)) %>%
   group_by(broad_id, dosage) %>%
-  summarise(variance=var(lfc, na.rm=TRUE))
-head(variances)
+  summarise(
+    variance=var(lfc, na.rm=TRUE),
+    mean.mag=mean(abs(lfc), na.rm=TRUE)
+  ) %>%
+  mutate(dose.bin=cut(dosage, c(0, 0.0007, 0.002, 0.01, 0.04, 0.16, 0.7, 5, 19)))
+per.drug.dose
 ```
 
-# Plot variances for a few broad ids to see if they actually tell us anything
+# Plot dose v. variance
 ```{r}
-ggplot(variances) +
-  geom_point(aes(x=dosage,y=variance), alpha=0.3)
+ggplot(per.drug.dose) + 
+  geom_boxplot(aes(group=dose.bin, x=dose.bin, fill=dose.bin, y=variance))
+ggplot(per.drug.dose) + 
+  geom_boxplot(aes(group=dose.bin, x=dose.bin, fill=dose.bin, y=variance/mean.mag))
+
+ggplot(per.drug.dose) + 
+  geom_point(aes(x=dosage, y=variance), alpha=0.3)
+ggplot(per.drug.dose) + 
+  geom_point(aes(x=dosage, y=variance/mean.mag), alpha=0.3)
 ```
 
+# Bin dosages
+```{r}
+hist(per.drug.dose$dosage, breaks=c(0, 0.0007, 0.002, 0.01, 0.04, 0.16, 0.7, 5, 19))
+```
 
 
