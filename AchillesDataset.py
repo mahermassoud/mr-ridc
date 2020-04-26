@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
+import pickle
 
 """
 Specify files here
@@ -20,8 +21,7 @@ DATASETS = {
     #"pca_crispr": , # TODO
   },
   "drug": {
-    "response": "secondary-screen-cell-line-info.csv",
-    "info": "secondary-screen-replicate-treatment-info.csv",
+    "response": "drug/drug_only_overlap/ov_dose_resp.npy",
     #"moa": "" # TODO
   }
 }
@@ -49,27 +49,44 @@ class AchillesDataset(Dataset):
     """
     self.axis = axis
     self.datasets = datasets
-    if axis not in DATASETS.keys():
+    if axis not in DATASETS.keys() or len(axis) != 1:
       raise ValueError(f"axis must be one of {DATASETS.keys()}")
     if any([ds not in DATASETS[axis].keys() for ds in datasets]):
       raise ValueError(f"datasets param must be in {DATASETS[axis].keys()}")
 
     # Maps from dataset to a tensor where each row represents a data point
     self.ds2table = {}
-    for ds in datasets:
-      numpy_fp = path.join(data_fp, DATASETS[axis][ds])
-      self.ds2table[ds] = torch.squeeze(to_tensor(np.load(numpy_fp)))
     
-    if axis == "cell_line" and "crispr" in datasets and "gene_expr" in datasets:
-      crispr = self.ds2table["crispr"]
-      expr = self.ds2table["gene_expr"]
-      combined = np.stack([crispr, expr]).transpose((1,0,2))
-      self.datasets.append("crispr_gene_expr")
-      self.ds2table["crispr_gene_expr"] = combined
+    if axis == "cell_line" 
+      for ds in datasets:
+        numpy_fp = path.join(data_fp, DATASETS[axis][ds])
+        self.ds2table[ds] = torch.squeeze(to_tensor(np.load(numpy_fp)))
+      if "crispr" in datasets and "gene_expr" in datasets:
+        crispr = self.ds2table["crispr"]
+        expr = self.ds2table["gene_expr"]
+        combined = np.stack([crispr, expr]).transpose((1,0,2))
+        self.datasets.append("crispr_gene_expr")
+        self.ds2table["crispr_gene_expr"] = combined
+      # Read in metadata
+      self.genes = np.load(path.join(data_fp, GENE_LIST_FN), allow_pickle=True)
+      self.cells = np.load(path.join(data_fp, CELL_LINES_FN), allow_pickle=True)
+    elif axis == "drug":
+      self.drug_response = to_tensor(np.load(
+        path.join(data_fp, "drug/drug_only_overlap/ov_dose_resp.npy")))
+      print("self.drug_response.shape")
+      print(self.drug_response.shape)
+      self.drug2moa_inds = pickle.load(
+        open(path.join(data_fp, "drug/drug_only_overlap/drug2moa_inds.pi")),
+        "rb"
+       )
+      self.moa_broad_ids = to_tensor(np.load(
+        path.join(data_fp, "drug/drug_only_overlap/moa_broad_ids.npy")))
+      ))
+      self.moas = to_tensor(np.load(
+        path.join(data_fp, "drug/drug_only_overlap/moas.npy")))
+      ))
+      self.ds2table["response"] = self.drug_response
     
-    # Read in metadata
-    self.genes = np.load(path.join(data_fp, GENE_LIST_FN), allow_pickle=True)
-    self.cells = np.load(path.join(data_fp, CELL_LINES_FN), allow_pickle=True)
 
   def __len__(self):
     return self.ds2table[self.datasets[0]].shape[0]
