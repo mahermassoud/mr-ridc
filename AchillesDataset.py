@@ -179,8 +179,6 @@ if __name__ == "__main__":
     print("batch[\"moa_ind\"]")
     moa_inds = batch["moa_ind"]
     print(moa_inds)
-    print("[list(mis) for mis in moa_inds]")
-    print([list(mis) for mis in moa_inds])
 
     print("corresponding moas")
     print([drug_achilles.moas[list(i)] for i in moa_inds])

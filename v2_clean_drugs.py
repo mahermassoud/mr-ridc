@@ -27,7 +27,7 @@ ov_info = info_w_moa[info_w_moa["broad_id"].isin(ov_drugs)]
 resp_cols = [None] + [c.split("::")[0] for c in drug_response.columns[1:]]
 keep_cols = np.where(np.array([rc in ov_drugs for rc in resp_cols]))[0]
 keep_cols = np.concatenate([[0], keep_cols])
-ov_response = drug_response[:,list(keep_cols)]
+ov_response = drug_response.iloc[:,list(keep_cols)]
 #resp_cols = np.where(np.isin(response_drugs, ov_drugs)) + 1
 #ov_response = drug_response[[0]+resp_cols]
 
