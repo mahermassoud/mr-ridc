@@ -193,73 +193,74 @@ if __name__ == "__main__":
     out_dict = default_collate(batch)
     out_dict["moa_ind"] = moas
     return out_dict
-  #print("----------Iterating over cell lines-----------")
-  #cell_achilles = AchillesDataset(
-  #  data_fp="/Users/massoudmaher/Documents/Code/mr-ridc/data",
-  #  axis="cell_line",
-  #  datasets=["crispr","gene_expr"]
-  # )
+
+  print("----------Iterating over cell lines-----------")
+  DD = "/Users/massoudmaher/Documents/Code/mr-ridc/data"
+  #DD = "/content/drive/My Drive/Mr RIDC/Data
+  cell_achilles = AchillesDataset(
+    data_fp=DD,
+    axis="cell_line",
+    datasets=["crispr","gene_expr"]
+   )
+
+  cell_achilles_loader = DataLoader(cell_achilles, batch_size=4, shuffle=False)
+  i = 0
+  for batch in cell_achilles_loader:
+    print("batch[\"crispr\"].shape")
+    print(batch["crispr"].shape)
+    print("batch[\"gene_expr\"].shape")
+    print(batch["gene_expr"].shape)
+    print("batch[\"crispr_gene_expr\"].shape")
+    print(batch["crispr_gene_expr"].shape)
+
+    if i == 2:
+      break
+    i += 1
+
+  print("cell_achilles.genes holds gene names in correct order")
+  print(cell_achilles.genes[:5])
+  print("cell_achilles.cells holds cell line names in correct order")
+  print(cell_achilles.cells[:5])
+
+  print("\n\n----------Iterating over drugs----------")
+  drug_achilles = AchillesDataset(
+    data_fp=DD,
+    axis="drug",
+    datasets=["response"]
+  )
+
+  drug_loader = DataLoader(drug_achilles, batch_size=4, shuffle=True, 
+                           collate_fn=drug_collate_fn)
+  i = 0
+  for batch in drug_loader:
+    print("batch[\"response\"].shape")
+    print(batch["response"].shape)
+    print("First column is dosage!!!!")
+
+    print("drug_achilles.cells holds cells in same order as batch[response] cols")
+    print(drug_achilles.cells[:5])
+    print("note that drug_achilles.cells.shape is 1 less since the first column is dosage")
+    print(drug_achilles.cells.shape)
+
+    print("batch[\"drug\"]")
+    print(batch["drug"])
+
+    print("batch[\"moa_ind\"]")
+    moa_inds = batch["moa_ind"]
+    print(moa_inds)
+
+    print("corresponding moas")
+    print([drug_achilles.moas[list(i)] for i in moa_inds])
 
 
-  #cell_achilles_loader = DataLoader(cell_achilles, batch_size=4, shuffle=False)
-  #i = 0
-  #for batch in cell_achilles_loader:
-  #  print("batch[\"crispr\"].shape")
-  #  print(batch["crispr"].shape)
-  #  print("batch[\"gene_expr\"].shape")
-  #  print(batch["gene_expr"].shape)
-  #  print("batch[\"crispr_gene_expr\"].shape")
-  #  print(batch["crispr_gene_expr"].shape)
-
-  #  if i == 2:
-  #    break
-  #  i += 1
-
-  #print("cell_achilles.genes holds gene names in correct order")
-  #print(cell_achilles.genes[:5])
-  #print("cell_achilles.cells holds cell line names in correct order")
-  #print(cell_achilles.cells[:5])
-
-  #print("\n\n----------Iterating over drugs----------")
-  #drug_achilles = AchillesDataset(
-  #  data_fp="/Users/massoudmaher/Documents/Code/mr-ridc/data",
-  #  axis="drug",
-  #  datasets=["response"]
-  #)
-
-  #drug_loader = DataLoader(drug_achilles, batch_size=4, shuffle=True, 
-  #                         collate_fn=drug_collate_fn)
-  #i = 0
-  #for batch in drug_loader:
-  #  print("batch[\"response\"].shape")
-  #  print(batch["response"].shape)
-  #  print("First column is dosage!!!!")
-
-  #  print("drug_achilles.cells holds cells in same order as batch[response] cols")
-  #  print(drug_achilles.cells[:5])
-  #  print("note that drug_achilles.cells.shape is 1 less since the first column is dosage")
-  #  print(drug_achilles.cells.shape)
-
-  #  print("batch[\"drug\"]")
-  #  print(batch["drug"])
-
-  #  print("batch[\"moa_ind\"]")
-  #  moa_inds = batch["moa_ind"]
-  #  print(moa_inds)
-
-  #  print("corresponding moas")
-  #  print([drug_achilles.moas[list(i)] for i in moa_inds])
-
-
-  #  if i == 2:
-  #    break
-  #  i += 1
+    if i == 2:
+      break
+    i += 1
   
   print("\n\n----Iterating over drugs with feature vectors for each cell line CRISPR ONLY-----")
   print("The data was already subsetted by only taking cell lines and genes that overlap between crispr and RNA-seq")
-  DD = "/Users/massoudmaher/Documents/Code/mr-ridc/data"
   feat_drug_achilles = AchillesDataset(
-    data_fp="/Users/massoudmaher/Documents/Code/mr-ridc/data",
+    data_fp=DD,
     axis="drug",
     datasets=["response"],
     drug_feature_fp=path.join(DD, "pca50_imputed_crispr.npy"),
@@ -282,9 +283,8 @@ if __name__ == "__main__":
   gc.collect()
   print("\n\n----Iterating over drugs with feature vectors for each cell line EXPRESSION ONLY-----")
   print("The data was already subsetted by only taking cell lines and genes that overlap between crispr and RNA-seq")
-  DD = "/Users/massoudmaher/Documents/Code/mr-ridc/data"
   feat_drug_achilles = AchillesDataset(
-    data_fp="/Users/massoudmaher/Documents/Code/mr-ridc/data",
+    data_fp=DD,
     axis="drug",
     datasets=["response"],
     drug_feature_fp=path.join(DD, "pca50_imp_expr.npy"),
@@ -307,9 +307,8 @@ if __name__ == "__main__":
   gc.collect()
   print("\n\n----Iterating over drugs with feature vectors for each cell line CRISPR AND EXPRESSION-----")
   print("The data was already subsetted by only taking cell lines and genes that overlap between crispr and RNA-seq")
-  DD = "/Users/massoudmaher/Documents/Code/mr-ridc/data"
   feat_drug_achilles = AchillesDataset(
-    data_fp="/Users/massoudmaher/Documents/Code/mr-ridc/data",
+    data_fp=DD,
     axis="drug",
     datasets=["response"],
     drug_feature_fp=path.join(DD, "pca50_imp_crispr_expr.npy"),
