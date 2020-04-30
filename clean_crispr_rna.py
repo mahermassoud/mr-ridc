@@ -80,8 +80,8 @@ stack_expression = np.expand_dims(z_imp_expression_mp, axis=2).astype(float)
 stack_crispr = np.expand_dims(imp_crispr_np, axis=2).astype(float)
 
 #%% Save files for later
-#np.save(path.join(data_fp, "norm_imputed_expression.npy"), z_imp_expression_mp)
-#np.save(path.join(data_fp, "imputed_crispr.npy"), crispr_np)
+np.save(path.join(data_fp, "norm_imputed_expression.npy"), z_imp_expression_mp)
+np.save(path.join(data_fp, "imputed_crispr.npy"), imp_crispr_np)
 
 #%% Prepare metadata
 cell_lines_np = cell_lines.to_numpy()
@@ -91,10 +91,13 @@ gene_list_np = expression_final.columns.to_numpy()
 np.save(path.join(data_fp, "clean_gene_list.npy"), gene_list_np)
 np.save(path.join(data_fp, "clean_cell_lines.npy"), cell_lines_np)
 #%%
-#combined = np.concatenate( (norm_expression,norm_crispr),axis=2) 
-#combined = combined.astype(float)
+combined = np.concatenate( (z_imp_expression_mp, imp_crispr_np),axis=2) 
+combined = combined.astype(float)
 
 # save files for easy loading later
 #np.save("/content/drive/My Drive/Mr RIDC/Data/norm_expression", norm_expression)
 #np.save("/content/drive/My Drive/Mr RIDC/Data/norm_crispr", norm_crispr)
 #np.save("/content/drive/My Drive/Mr RIDC/Data/combined", combined)
+
+
+# %%
