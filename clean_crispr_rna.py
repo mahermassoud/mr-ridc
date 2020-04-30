@@ -91,8 +91,8 @@ gene_list_np = expression_final.columns.to_numpy()
 np.save(path.join(data_fp, "clean_gene_list.npy"), gene_list_np)
 np.save(path.join(data_fp, "clean_cell_lines.npy"), cell_lines_np)
 #%%
-combined = np.concatenate( (z_imp_expression_mp, imp_crispr_np),axis=2) 
-combined = combined.astype(float)
+combined = np.concatenate((z_imp_expression_mp, imp_crispr_np), axis=1) 
+np.save(path.join(data_fp, "norm_imp_expr_n_crispr"), combined)
 
 # save files for easy loading later
 #np.save("/content/drive/My Drive/Mr RIDC/Data/norm_expression", norm_expression)

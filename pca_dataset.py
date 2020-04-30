@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 #%% Load in data
 data_fp = "/Users/massoudmaher/Documents/Code/mr-ridc/data"
-data_fn = "norm_imp_expr_n_crispr.npy"
+data_fn = "norm_imputed_expression.npy"
 
 data = np.load(path.join(data_fp, data_fn))
 
@@ -36,11 +36,11 @@ def plot_variance_explained(cumm_variance_explained, pt_title,
   if out_fp is not None:
     plt.savefig(out_fp)
 
-plot_variance_explained(cum_var, "CRISPR andGene expression", 
-                        out_fp=path.join(data_fp, "plots/imputed_crispr_and_expr_pca.jpg"))
+#plot_variance_explained(cum_var, "CRISPR andGene expression", 
+#                        out_fp=path.join(data_fp, "plots/imputed_crispr_and_expr_pca.jpg"))
 # %%
-reduced_data = pca_data[:,:250]
-out_fp = path.join(data_fp, "pca250_imp_crispr_expr.npy")
+reduced_data = pca_data[:,:50]
+out_fp = path.join(data_fp, "pca50_imp_expr.npy")
 np.save(out_fp, reduced_data)
 
 # %%
