@@ -84,6 +84,17 @@ def stack_response_dosage(drug_response):
 
 ov_resp_cell, ov_resp_drug, ov_dose_resp = stack_response_dosage(ov_response)
 
+#%% Normalize dosages and drug responses
+#exp_normalizer = StandardScaler().fit(imp_expression_np)
+#z_imp_expression_mp = exp_normalizer.transform(imp_expression_np)
+from sklearn.preprocessing import StandardScaler
+normalizer = StandardScaler().fit(ov_dose_resp)
+norm_ov_dose_resp = normalizer.transform(ov_dose_resp)
+
+from sklearn.preprocessing import MinMaxScaler
+min_maxer = MinMaxScaler().fit(ov_dose_resp)
+mm_ov_dose_resp = min_maxer.transform(ov_dose_resp)
+
 # %% Save files
 np.save(path.join(data_fp, "drug/drug_only_overlap/moa_broad_ids.npy"), broad_id_np)
 np.save(path.join(data_fp, "drug/drug_only_overlap/moas.npy"), uniq_moa_np)
@@ -96,5 +107,7 @@ pickle.dump(drug2moa_n_hot,
 np.save(path.join(data_fp, "drug/drug_only_overlap/ov_resp_cell.npy"), ov_resp_cell)
 np.save(path.join(data_fp, "drug/drug_only_overlap/ov_resp_drug.npy"), ov_resp_drug)
 np.save(path.join(data_fp, "drug/drug_only_overlap/ov_dose_resp.npy"), ov_dose_resp)
+np.save(path.join(data_fp, "drug/drug_only_overlap/norm_ov_dose_resp.npy"), norm_ov_dose_resp)
+np.save(path.join(data_fp, "drug/drug_only_overlap/mm_ov_dose_resp.npy"), mm_ov_dose_resp)
 
 # %%

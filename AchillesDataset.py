@@ -196,7 +196,7 @@ if __name__ == "__main__":
 
   print("----------Iterating over cell lines-----------")
   DD = "/Users/massoudmaher/Documents/Code/mr-ridc/data"
-  #DD = "/content/drive/My Drive/Mr RIDC/Data
+  #DD = "/content/drive/My Drive/Mr RIDC/Data"
   cell_achilles = AchillesDataset(
     data_fp=DD,
     axis="cell_line",
